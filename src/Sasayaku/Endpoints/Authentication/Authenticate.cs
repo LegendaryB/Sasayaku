@@ -27,7 +27,7 @@ namespace Sasayaku.Endpoints.Authentication
 
             var token = tokenService.GenerateToken(request.Credentials);
 
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]>());
+            return TypedResults.Ok(new Response(token));
         }
     }
 }

@@ -18,8 +18,7 @@ namespace Sasayaku.Services
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var keyAsBytes = Encoding.ASCII.GetBytes(authenticationOptions.Value.JwtSecretKey);
-            var key = new SymmetricSecurityKey(keyAsBytes);
+            var key = CreateSymetricSecurityKey(authenticationOptions.Value.JwtSecretKey);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -37,6 +36,13 @@ namespace Sasayaku.Services
             var token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        public static SymmetricSecurityKey CreateSymetricSecurityKey(string key)
+        {
+            var keyAsBytes = Encoding.ASCII.GetBytes(key);
+
+            return new SymmetricSecurityKey(keyAsBytes);
         }
 
         private string GetRole(ClientCredentials credentials)

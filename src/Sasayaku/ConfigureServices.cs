@@ -1,4 +1,6 @@
-﻿using Sasayaku.Configuration;
+﻿using Microsoft.IdentityModel.Tokens;
+
+using Sasayaku.Configuration;
 using Sasayaku.Services;
 
 namespace Sasayaku
@@ -8,6 +10,7 @@ namespace Sasayaku
         public static void AddServices(this WebApplicationBuilder builder)
         {
             builder.AddSwagger();
+            builder.AddJwtAuthentication();
 
             builder.Services
                 .AddOptions<AppOptions>()
@@ -36,6 +39,28 @@ namespace Sasayaku
                 options.CustomSchemaIds(type => type.FullName?.Replace('+', '.'));
                 options.InferSecuritySchemes();
             });
+        }
+        private static void AddJwtAuthentication(this WebApplicationBuilder builder)
+        {
+            builder.Services.AddAuthentication().AddJwtBearer(options =>
+            {
+                var jwtSecretKey = builder.Configuration["Sasayaku:Authentication:JwtSecretKey"]!;
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = JwtTokenService.CreateSymetricSecurityKey(jwtSecretKey),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            builder.Services.AddAuthorization();
+
+            //builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+            //builder.Services.AddTransient<Jwt>();
         }
     }
 }
